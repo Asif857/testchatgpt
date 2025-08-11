@@ -5,6 +5,6 @@ A simple browser-based two-player fighting game using HTML, CSS, and JavaScript.
 ## How to Run
 1. Open `index.html` in a modern browser.
 2. Click **Start Game** and use the following controls:
-   - Player 1: A/D move, W jump, F punch.
-   - Player 2: Left/Right move, Up jump, L punch.
+    - Player 1: A/D move, W jump, F punch, G kick, S+F special.
+    - Player 2: Left/Right move, Up jump, L punch, ; kick, Down+L special.
 3. Each fighter fetches a random avatar image from the Rick and Morty API and has randomized stats.
