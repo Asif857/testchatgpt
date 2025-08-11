@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mini Multiplayer Fighter</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="startScreen">
+    <h1>Mini Multiplayer Fighter</h1>
+    <button id="startBtn">Start Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game" class="hidden">
+    <div id="scoreboard">
+      <span id="p1-health">P1 Health: 100</span>
+      <span id="p2-health">P2 Health: 100</span>
+    </div>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+  </div>
+
+  <!-- Instructions -->
+  <div id="instructions">
+    <p>Player 1: A/D move, W jump, F punch.</p>
+    <p>Player 2: Left/Right move, Up jump, L punch.</p>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
