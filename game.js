@@ -9,6 +9,13 @@ const p2HealthLabel = document.getElementById("p2-health");
 const GRAVITY = 0.6;
 const FRICTION = 0.8;
 
+// Simple ability animations pulled from public GIFs
+const abilityAnimations = {
+  punch: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
+  kick: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
+  special: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
+};
+
 class Fighter {
   constructor(x, controls) {
     this.x = x;
@@ -64,8 +71,22 @@ let player1, player2;
 let keys = {};
 
 function initGame() {
-  player1 = new Fighter(100, { left: "a", right: "d", jump: "w", punch: "f" });
-  player2 = new Fighter(600, { left: "ArrowLeft", right: "ArrowRight", jump: "ArrowUp", punch: "l" });
+  player1 = new Fighter(100, {
+    left: "a",
+    right: "d",
+    jump: "w",
+    punch: "f",
+    kick: "g",
+    specialCombo: ["s", "f"],
+  });
+  player2 = new Fighter(600, {
+    left: "arrowleft",
+    right: "arrowright",
+    jump: "arrowup",
+    punch: "l",
+    kick: ";",
+    specialCombo: ["arrowdown", "l"],
+  });
   player1.loadRandomAvatar();
   player2.loadRandomAvatar();
 }
@@ -73,32 +94,85 @@ function initGame() {
 window.addEventListener("keydown", (e) => (keys[e.key.toLowerCase()] = true));
 window.addEventListener("keyup", (e) => (keys[e.key.toLowerCase()] = false));
 
-function handleControls() {
-  if (keys[player1.controls.left]) player1.vx = -player1.speed;
-  if (keys[player1.controls.right]) player1.vx = player1.speed;
-  if (keys[player1.controls.jump] && player1.y >= canvas.height - player1.height)
-    player1.vy = -12;
+  function handleControls() {
+    if (keys[player1.controls.left]) player1.vx = -player1.speed;
+    if (keys[player1.controls.right]) player1.vx = player1.speed;
+    if (keys[player1.controls.jump] && player1.y >= canvas.height - player1.height)
+      player1.vy = -12;
 
-  if (keys[player2.controls.left]) player2.vx = -player2.speed;
-  if (keys[player2.controls.right]) player2.vx = player2.speed;
-  if (keys[player2.controls.jump] && player2.y >= canvas.height - player2.height)
-    player2.vy = -12;
+    if (keys[player2.controls.left]) player2.vx = -player2.speed;
+    if (keys[player2.controls.right]) player2.vx = player2.speed;
+    if (keys[player2.controls.jump] && player2.y >= canvas.height - player2.height)
+      player2.vy = -12;
 
-  if (keys[player1.controls.punch]) punch(player1, player2);
-  if (keys[player2.controls.punch]) punch(player2, player1);
-}
+    if (keys[player1.controls.punch]) punch(player1, player2);
+    if (keys[player2.controls.punch]) punch(player2, player1);
+    if (keys[player1.controls.kick]) kick(player1, player2);
+    if (keys[player2.controls.kick]) kick(player2, player1);
 
-function punch(attacker, defender) {
-  if (
-    attacker.x < defender.x + defender.width &&
-    attacker.x + attacker.width > defender.x &&
-    attacker.y < defender.y + defender.height &&
-    attacker.y + attacker.height > defender.y
-  ) {
-    defender.health -= attacker.strength;
-    updateHealthUI();
+    if (
+      player1.controls.specialCombo &&
+      player1.controls.specialCombo.every((key) => keys[key])
+    )
+      special(player1, player2);
+    if (
+      player2.controls.specialCombo &&
+      player2.controls.specialCombo.every((key) => keys[key])
+    )
+      special(player2, player1);
   }
-}
+
+  function showAbilityAnimation(attacker, ability) {
+    const img = document.createElement("img");
+    img.src = abilityAnimations[ability];
+    img.style.position = "absolute";
+    const rect = canvas.getBoundingClientRect();
+    img.style.left = `${rect.left + attacker.x}px`;
+    img.style.top = `${rect.top + attacker.y - 40}px`;
+    img.style.width = "80px";
+    img.style.pointerEvents = "none";
+    document.body.appendChild(img);
+    setTimeout(() => document.body.removeChild(img), 500);
+  }
+
+  function punch(attacker, defender) {
+    if (
+      attacker.x < defender.x + defender.width &&
+      attacker.x + attacker.width > defender.x &&
+      attacker.y < defender.y + defender.height &&
+      attacker.y + attacker.height > defender.y
+    ) {
+      defender.health -= attacker.strength;
+      updateHealthUI();
+      showAbilityAnimation(attacker, "punch");
+    }
+  }
+
+  function kick(attacker, defender) {
+    if (
+      attacker.x < defender.x + defender.width &&
+      attacker.x + attacker.width > defender.x &&
+      attacker.y < defender.y + defender.height &&
+      attacker.y + attacker.height > defender.y
+    ) {
+      defender.health -= attacker.strength + 5;
+      updateHealthUI();
+      showAbilityAnimation(attacker, "kick");
+    }
+  }
+
+  function special(attacker, defender) {
+    if (
+      attacker.x < defender.x + defender.width &&
+      attacker.x + attacker.width > defender.x &&
+      attacker.y < defender.y + defender.height &&
+      attacker.y + attacker.height > defender.y
+    ) {
+      defender.health -= attacker.strength + 15;
+      updateHealthUI();
+      showAbilityAnimation(attacker, "special");
+    }
+  }
 
 function updateHealthUI() {
   p1HealthLabel.textContent = `P1 Health: ${player1.health}`;
