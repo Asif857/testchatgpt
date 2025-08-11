@@ -9,7 +9,17 @@
   <!-- Start Screen -->
   <div id="startScreen">
     <h1>Mini Multiplayer Fighter</h1>
-    <button id="startBtn">Start Game</button>
+    <div id="characterSelect">
+      <div class="player-select">
+        <h3>Player 1</h3>
+        <div class="character-grid" data-player="1"></div>
+      </div>
+      <div class="player-select">
+        <h3>Player 2</h3>
+        <div class="character-grid" data-player="2"></div>
+      </div>
+    </div>
+    <button id="startBtn" disabled>Start Game</button>
   </div>
 
   <!-- Game Screen -->

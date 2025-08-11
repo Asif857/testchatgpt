@@ -3,21 +3,67 @@ const ctx = canvas.getContext("2d");
 const startBtn = document.getElementById("startBtn");
 const startScreen = document.getElementById("startScreen");
 const gameDiv = document.getElementById("game");
+const characterSelectGrids = document.querySelectorAll(".character-grid");
 const p1HealthLabel = document.getElementById("p1-health");
 const p2HealthLabel = document.getElementById("p2-health");
 
 const GRAVITY = 0.6;
 const FRICTION = 0.8;
 
-// Simple ability animations pulled from public GIFs
-const abilityAnimations = {
-  punch: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
-  kick: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
-  special: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
-};
+// Pool of simple animated GIF characters
+const characterPool = [
+  {
+    name: "Fighter",
+    idle: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
+    abilities: {
+      punch: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
+      kick: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
+      special: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
+    },
+  },
+  {
+    name: "Kicker",
+    idle: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
+    abilities: {
+      punch: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
+      kick: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
+      special: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
+    },
+  },
+  {
+    name: "Mage",
+    idle: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
+    abilities: {
+      punch: "https://media.giphy.com/media/l1KVc8nx9a05v2FXu/giphy.gif",
+      kick: "https://media.giphy.com/media/3oz8xKaR836UJOYeOc/giphy.gif",
+      special: "https://media.giphy.com/media/feqkVgjJpYtjy/giphy.gif",
+    },
+  },
+];
+
+const selectedCharacters = {};
+
+characterSelectGrids.forEach((grid) => {
+  characterPool.forEach((char, index) => {
+    const img = document.createElement("img");
+    img.src = char.idle;
+    img.classList.add("character-option");
+    img.addEventListener("click", () => selectCharacter(grid.dataset.player, index, img));
+    grid.appendChild(img);
+  });
+});
+
+function selectCharacter(player, index, imgEl) {
+  selectedCharacters[player] = characterPool[index];
+  document
+    .querySelectorAll(`[data-player='${player}'] .character-option`)
+    .forEach((el) => el.classList.remove("selected"));
+  imgEl.classList.add("selected");
+  if (selectedCharacters[1] && selectedCharacters[2]) startBtn.disabled = false;
+}
 
 class Fighter {
-  constructor(x, controls) {
+  constructor(x, controls, character) {
     this.x = x;
     this.y = canvas.height - 100;
     this.vx = 0;
@@ -30,15 +76,10 @@ class Fighter {
     this.speed = Math.floor(Math.random() * 5) + 3;
     this.controls = controls;
     this.image = new Image();
-    this.ready = false;
-  }
-
-  async loadRandomAvatar() {
-    const randomId = Math.floor(Math.random() * 826) + 1;
-    const res = await fetch(`https://rickandmortyapi.com/api/character/${randomId}`);
-    const data = await res.json();
-    this.image.src = data.image;
+    this.image.src = character.idle;
     this.image.onload = () => (this.ready = true);
+    this.ready = false;
+    this.abilityAnimations = character.abilities;
   }
 
   update() {
@@ -78,7 +119,7 @@ function initGame() {
     punch: "f",
     kick: "g",
     specialCombo: ["s", "f"],
-  });
+  }, selectedCharacters[1]);
   player2 = new Fighter(600, {
     left: "arrowleft",
     right: "arrowright",
@@ -86,9 +127,7 @@ function initGame() {
     punch: "l",
     kick: ";",
     specialCombo: ["arrowdown", "l"],
-  });
-  player1.loadRandomAvatar();
-  player2.loadRandomAvatar();
+  }, selectedCharacters[2]);
 }
 
 window.addEventListener("keydown", (e) => (keys[e.key.toLowerCase()] = true));
@@ -124,7 +163,7 @@ window.addEventListener("keyup", (e) => (keys[e.key.toLowerCase()] = false));
 
   function showAbilityAnimation(attacker, ability) {
     const img = document.createElement("img");
-    img.src = abilityAnimations[ability];
+    img.src = attacker.abilityAnimations[ability];
     img.style.position = "absolute";
     const rect = canvas.getBoundingClientRect();
     img.style.left = `${rect.left + attacker.x}px`;
